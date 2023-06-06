@@ -49,6 +49,9 @@ class CircularMenu extends StatefulWidget {
   /// ending angle in clockwise radian
   final double? endingAngleInRadian;
 
+  //text will only be displayed if no items have been provided
+  final String errorMessageIfItemsIsEmpty;
+
   /// creates a circular menu with specific [radius] and [alignment] .
   /// [toggleButtonElevation] ,[toggleButtonPadding] and [toggleButtonMargin] must be
   /// equal or greater than zero.
@@ -74,9 +77,10 @@ class CircularMenu extends StatefulWidget {
     this.key,
     this.startingAngleInRadian,
     this.endingAngleInRadian,
-  })  : assert(items.isNotEmpty, 'items can not be empty list'),
-        assert(items.length > 1, 'if you have one item no need to use a Menu'),
-        super(key: key);
+    this.errorMessageIfItemsIsEmpty = 'No Items',
+  }) //  : assert(items.isNotEmpty, 'items can not be empty list'),
+  //       assert(items.length > 1, 'if you have one item no need to use a Menu'),
+  : super(key: key);
 
   @override
   CircularMenuState createState() => CircularMenuState();
@@ -202,31 +206,79 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
   }
 
   List<Widget> _buildMenuItems() {
-    List<Widget> items = [];
-    widget.items.asMap().forEach((index, item) {
-      items.add(
+    if (widget.items.length == 0) {
+      return [
         Positioned.fill(
           child: Align(
             alignment: widget.alignment,
             child: Transform.translate(
-              offset: Offset.fromDirection(
-                  _completeAngle == (2 * math.pi)
-                      ? (_initialAngle + (_completeAngle! / (_itemsCount)) * index)
-                      : (_initialAngle + (_completeAngle! / (_itemsCount - 1)) * index),
-                  _animation.value * widget.radius),
+              offset: Offset.fromDirection(_initialAngle, _animation.value * widget.radius),
+              child: Transform.scale(
+                scale: _animation.value,
+                child: Transform.rotate(
+                    angle: _animation.value * (math.pi * 2),
+                    child: Container(
+                        padding: EdgeInsets.all(10),
+                        width: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Text(
+                          widget.errorMessageIfItemsIsEmpty,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.white),
+                        ))),
+              ),
+            ),
+          ),
+        ),
+      ];
+    } else if (widget.items.length == 1) {
+      return [
+        Positioned.fill(
+          child: Align(
+            alignment: widget.alignment,
+            child: Transform.translate(
+              offset: Offset.fromDirection(_initialAngle, _animation.value * widget.radius),
               child: Transform.scale(
                 scale: _animation.value,
                 child: Transform.rotate(
                   angle: _animation.value * (math.pi * 2),
-                  child: item,
+                  child: widget.items[0],
                 ),
               ),
             ),
           ),
         ),
-      );
-    });
-    return items;
+      ];
+    } else {
+      List<Widget> items = [];
+      widget.items.asMap().forEach((index, item) {
+        items.add(
+          Positioned.fill(
+            child: Align(
+              alignment: widget.alignment,
+              child: Transform.translate(
+                offset: Offset.fromDirection(
+                    _completeAngle == (2 * math.pi)
+                        ? (_initialAngle + (_completeAngle! / (_itemsCount)) * index)
+                        : (_initialAngle + (_completeAngle! / (_itemsCount - 1)) * index),
+                    _animation.value * widget.radius),
+                child: Transform.scale(
+                  scale: _animation.value,
+                  child: Transform.rotate(
+                    angle: _animation.value * (math.pi * 2),
+                    child: item,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      });
+      return items;
+    }
   }
 
   Widget _buildMenuButton(BuildContext context) {

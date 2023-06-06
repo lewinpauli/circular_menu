@@ -95,11 +95,13 @@ final circularMenu = CircularMenu(items: [
             ],
       toggleButtonIconColor: Colors.white,
       toggleButtonAnimatedIconData: null, //You should either provide toggleButtonAnimatedIconData or toggleButtonIconInactive & toggleButtonIconActive
-      toggleButtonIconInactive: Icons.menu, //main icon when the menu is closed
+      toggleButtonIconInactive: Icons.home, //main icon when the menu is closed
       toggleButtonIconActive: Icons.close, //main icon when the menu is opened
       toggleButtonMargin: 10.0,
       toggleButtonPadding: 10.0,
       toggleButtonSize: 40.0,
+      // will be displayed if no items are provided
+      errorMessageIfItemsIsEmpty: "No items exist",
       items: [
         CircularMenuItem(
           // menu item callback
