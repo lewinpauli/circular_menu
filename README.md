@@ -1,6 +1,3 @@
-
-
-
 A simple animated circular menu for Flutter, Adjustable radius, colors, alignment, animation curve and animation duration.
 
 [pub package](https://pub.dartlang.org/packages/circular_menu)
@@ -12,7 +9,6 @@ A simple animated circular menu for Flutter, Adjustable radius, colors, alignmen
 
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
-
 
 ### Installation
 
@@ -33,7 +29,6 @@ flutter pub get
 in your project's root directory.
 
 ### Basic Usage
-
 
 Import it to your project file
 
@@ -64,7 +59,7 @@ final circularMenu = CircularMenu(items: [
 
 ```
 
-* There are additional optional parameters to initialize the menu with:
+- There are additional optional parameters to initialize the menu with:
 
 ```dart
   final circularMenu = CircularMenu(
@@ -97,8 +92,11 @@ final circularMenu = CircularMenu(items: [
                 color: Colors.blue,
                 blurRadius: 10,
               ),
-            ], 
+            ],
       toggleButtonIconColor: Colors.white,
+      toggleButtonAnimatedIconData: null, //You should either provide toggleButtonAnimatedIconData or toggleButtonIconInactive & toggleButtonIconActive
+      toggleButtonIconInactive: Icons.menu, //main icon when the menu is closed
+      toggleButtonIconActive: Icons.close, //main icon when the menu is opened
       toggleButtonMargin: 10.0,
       toggleButtonPadding: 10.0,
       toggleButtonSize: 40.0,
@@ -143,7 +141,7 @@ final circularMenu = CircularMenu(items: [
 
 ```
 
-* add badge to ```CircularMenuItem``` by setting the property ```enableBadge``` to ```true```
+- add badge to `CircularMenuItem` by setting the property `enableBadge` to `true`
 
 ```dart
 CircularMenuItem(
@@ -151,9 +149,9 @@ CircularMenuItem(
             )
 ```
 
-* customize badge by setting the parameters   ```badgeColor``` , ```badgeLabel``` , ```badgeRadius```
-  ```badgeTextColor``` , ```badgeRightOffet``` , ```badgeTopOffet``` , ```badgeBottomOffet``` , ```badgeLeftOffet``` 
-  ```badgeTextStyle``` to satisfy  requirements .
+- customize badge by setting the parameters `badgeColor` , `badgeLabel` , `badgeRadius`
+  `badgeTextColor` , `badgeRightOffet` , `badgeTopOffet` , `badgeBottomOffet` , `badgeLeftOffet`
+  `badgeTextStyle` to satisfy requirements .
 
 ```dart
 CircularMenuItem(
@@ -172,9 +170,7 @@ CircularMenuItem(
             )
 ```
 
-
-* control animation anywhere in your code using a key:
-
+- control animation anywhere in your code using a key:
 
 ```dart
   GlobalKey<CircularMenuState> key = GlobalKey<CircularMenuState>();
@@ -260,8 +256,8 @@ CircularMenuItem(
 }
 
 ```
- 
-* use ```MultiCircularMenu``` to show more than one menu in the same widget :
+
+- use `MultiCircularMenu` to show more than one menu in the same widget :
 
 ```dart
 
@@ -332,4 +328,3 @@ MultiCircularMenu(
 
 
 ```
-
