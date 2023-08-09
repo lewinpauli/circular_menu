@@ -11,10 +11,10 @@ class CircularMenuItem extends StatelessWidget {
   final double margin;
   final List<BoxShadow>? boxShadow;
   final bool enableBadge;
-  final double? badgeRightOffet;
-  final double? badgeLeftOffet;
-  final double? badgeTopOffet;
-  final double? badgeBottomOffet;
+  final double? badgeRightOffset;
+  final double? badgeLeftOffset;
+  final double? badgeTopOffset;
+  final double? badgeBottomOffset;
   final double? badgeRadius;
   final TextStyle? badgeTextStyle;
   final String? badgeLabel;
@@ -38,10 +38,10 @@ class CircularMenuItem extends StatelessWidget {
     this.padding = 10,
     this.margin = 10,
     this.enableBadge = false,
-    this.badgeBottomOffet,
-    this.badgeLeftOffet,
-    this.badgeRightOffet,
-    this.badgeTopOffet,
+    this.badgeBottomOffset,
+    this.badgeLeftOffset,
+    this.badgeRightOffset,
+    this.badgeTopOffset,
     this.badgeRadius,
     this.badgeTextStyle,
     this.badgeLabel,
@@ -88,10 +88,10 @@ class CircularMenuItem extends StatelessWidget {
   Widget _buildCircularMenuItemWithBadge(BuildContext context) {
     return _Badge(
       color: badgeColor,
-      bottomOffset: badgeBottomOffet,
-      rightOffset: badgeRightOffet,
-      leftOffset: badgeLeftOffet,
-      topOffset: badgeTopOffet,
+      bottomOffset: badgeBottomOffset,
+      rightOffset: badgeRightOffset,
+      leftOffset: badgeLeftOffset,
+      topOffset: badgeTopOffset,
       radius: badgeRadius,
       textStyle: badgeTextStyle,
       onTap: onTap,
@@ -103,9 +103,7 @@ class CircularMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return enableBadge
-        ? _buildCircularMenuItemWithBadge(context)
-        : _buildCircularMenuItem(context);
+    return enableBadge ? _buildCircularMenuItemWithBadge(context) : _buildCircularMenuItem(context);
   }
 }
 
@@ -145,26 +143,31 @@ class _Badge extends StatelessWidget {
       children: [
         child,
         Positioned(
-          right: (leftOffset == null && rightOffset == null) ? 8 : rightOffset,
-          top: (topOffset == null && bottomOffset == null) ? 8 : topOffset,
+          right: rightOffset,
+          top: topOffset,
           left: leftOffset,
           bottom: bottomOffset,
           child: FittedBox(
             child: GestureDetector(
               onTap: onTap as void Function()? ?? () {},
-              child: CircleAvatar(
-                maxRadius: radius ?? 10,
-                minRadius: radius ?? 10,
-                backgroundColor: color ?? Theme.of(context).primaryColor,
+              child: Container(
+                // maxRadius: radius ?? 10,
+                // minRadius: radius ?? 10,
+                //backgroundcolor: color ?? Theme.of(context).primaryColor,
+                decoration: BoxDecoration(
+                  color: color ?? Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(radius ?? 10),
+                ),
+
                 child: FittedBox(
-                  child: Text(
-                    label ?? '',
-                    textAlign: TextAlign.center,
-                    style: textStyle ??
-                        TextStyle(
-                            fontSize: 10,
-                            color: textColor ??
-                                Theme.of(context).colorScheme.secondary),
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: Text(
+                      label ?? '',
+                      textAlign: TextAlign.center,
+                      style: textStyle ??
+                          TextStyle(fontSize: 10, color: textColor ?? Theme.of(context).colorScheme.secondary),
+                    ),
                   ),
                 ),
               ),
