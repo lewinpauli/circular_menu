@@ -138,6 +138,8 @@ class _MultiCircularMenuState extends State<MultiCircularMenu> {
         items: menu.items,
         alignment: menu.alignment,
         radius: menu.radius,
+        itemsPerRow: menu.itemsPerRow,
+        rowSpacing: menu.rowSpacing,
         backgroundWidget: menu.backgroundWidget,
         animationDuration: menu.animationDuration,
         curve: menu.curve,

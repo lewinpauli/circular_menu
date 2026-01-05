@@ -23,7 +23,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int amountItems = 5;
+  int amountItems = 10; // Increased to demonstrate multi-row
   List<Marker> markers = [];
 
   // Controller to coordinate multiple CircularMenus on the map
@@ -36,7 +36,7 @@ class _MyHomePageState extends State<MyHomePage> {
       'lat': 52.5200,
       'lng': 13.4050,
       'color': Colors.blue,
-      'available': 3,
+      'available': 16,
     },
     {
       'name': 'Station Beta',
@@ -108,6 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
           radius: 60,
+          itemsPerRow: [5, 10, 20], // 5 items in row 1, 10 in row 2, 20 in row 3+
+          rowSpacing: 45,
           alignment: Alignment.center,
           onOpen: () {
             _menuController.onMenuOpened(key);
@@ -115,50 +117,104 @@ class _MyHomePageState extends State<MyHomePage> {
           onClose: () {
             _menuController.onMenuClosed(key);
           },
-          items: [
-            CircularMenuItem(
-              iconSize: 20,
-              icon: Icons.info_outline,
-              color: station['color'],
-              onTap: () {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${station['name']}: ${station['available']} chargers available'),
-                    duration: const Duration(seconds: 2),
+          items: index == 0
+              ? [
+                  // Station Alpha has 16 items to demonstrate multi-row
+                  for (int i = 0; i < 16; i++)
+                    CircularMenuItem(
+                      iconSize: 18,
+                      icon: [
+                        Icons.info_outline,
+                        Icons.navigation,
+                        Icons.bolt,
+                        Icons.local_parking,
+                        Icons.access_time,
+                        Icons.payment,
+                        Icons.qr_code,
+                        Icons.share,
+                        Icons.favorite,
+                        Icons.star,
+                        Icons.phone,
+                        Icons.email,
+                        Icons.directions_car,
+                        Icons.speed,
+                        Icons.battery_charging_full,
+                        Icons.power,
+                      ][i],
+                      color: [
+                        station['color'],
+                        Colors.blue,
+                        Colors.amber,
+                        Colors.green,
+                        Colors.orange,
+                        Colors.purple,
+                        Colors.teal,
+                        Colors.pink,
+                        Colors.red,
+                        Colors.yellow.shade700,
+                        Colors.indigo,
+                        Colors.cyan,
+                        Colors.brown,
+                        Colors.deepOrange,
+                        Colors.lightGreen,
+                        Colors.deepPurple,
+                      ][i],
+                      onTap: () {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('${station['name']} - Action ${i + 1}'),
+                            duration: const Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                    ),
+                ]
+              : [
+                  // Other stations have 3 items
+                  CircularMenuItem(
+                    iconSize: 20,
+                    icon: Icons.info_outline,
+                    color: station['color'],
+                    onTap: () {
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${station['name']}: ${station['available']} chargers available'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            CircularMenuItem(
-              iconSize: 20,
-              icon: Icons.navigation,
-              color: Colors.blue,
-              onTap: () {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Navigate to ${station['name']}'),
-                    duration: const Duration(seconds: 2),
+                  CircularMenuItem(
+                    iconSize: 20,
+                    icon: Icons.navigation,
+                    color: Colors.blue,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Navigate to ${station['name']}'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-            CircularMenuItem(
-              iconSize: 20,
-              icon: Icons.bolt,
-              color: Colors.amber,
-              onTap: () {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Start charging at ${station['name']}'),
-                    duration: const Duration(seconds: 2),
+                  CircularMenuItem(
+                    iconSize: 20,
+                    icon: Icons.bolt,
+                    color: Colors.amber,
+                    onTap: () {
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Start charging at ${station['name']}'),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
-          ],
+                ],
         ),
       );
     });
@@ -239,7 +295,7 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
           ),
-          // Circular Menu overlay for general actions
+          // Circular Menu overlay for general actions (demonstrates multi-row)
           CircularMenu(
             toggleButtonMargin: 10,
             toggleButtonPadding: 5,
@@ -251,14 +307,16 @@ class _MyHomePageState extends State<MyHomePage> {
             curve: Curves.easeIn,
             reverseCurve: Curves.easeOut,
             radius: 70,
+            itemsPerRow: [4, 6], // 4 items in first row, 6 in subsequent rows
+            rowSpacing: 50, // Space between rows
             alignment: Alignment.bottomRight,
             items: [
               for (int i = 0; i < amountItems; i++)
                 CircularMenuItem(
-                  iconSize: 30,
+                  iconSize: 25,
                   enableBadge: true,
                   badgeTextColor: Colors.white,
-                  badgeTopOffset: 50,
+                  badgeTopOffset: 40,
                   badgeLabel: "$i",
                   icon: Icons.ev_station,
                   color: Colors.pink,

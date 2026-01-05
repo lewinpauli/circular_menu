@@ -17,6 +17,15 @@ class CircularMenu extends StatefulWidget {
   /// menu radius
   final double radius;
 
+  /// List specifying the maximum number of items per row/ring.
+  /// e.g., [5, 10, 20] means 5 items in first row, 10 in second, 20+ in subsequent rows.
+  /// If the list is shorter than the number of rows needed, the last value is repeated.
+  /// Set to null to put all items in a single row.
+  final List<int>? itemsPerRow;
+
+  /// Spacing between rows (added to radius for each additional row)
+  final double rowSpacing;
+
   /// widget holds actual page content
   final Widget? backgroundWidget;
 
@@ -75,6 +84,8 @@ class CircularMenu extends StatefulWidget {
     required this.items,
     this.alignment = Alignment.bottomCenter,
     this.radius = 100,
+    this.itemsPerRow = const [6],
+    this.rowSpacing = 50,
     this.backgroundWidget,
     this.animationDuration = const Duration(milliseconds: 500),
     this.curve = Curves.bounceOut,
@@ -120,7 +131,6 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
   late double _initialAngle;
   double? _endAngle;
   double? _startAngle;
-  late int _itemsCount;
   late Animation<double> _animation;
   bool _isVisible = true;
 
@@ -159,7 +169,6 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
     _animation = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: widget.curve, reverseCurve: widget.reverseCurve),
     );
-    _itemsCount = widget.items.length;
     super.initState();
   }
 
@@ -287,17 +296,88 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
       ];
     } else {
       List<Widget> items = [];
-      widget.items.asMap().forEach((index, item) {
-        double angle = _completeAngle == (2 * math.pi)
-            ? (_initialAngle + (_completeAngle! / (_itemsCount)) * index)
-            : (_initialAngle + (_completeAngle! / (_itemsCount - 1)) * index);
 
-        items.add(Positioned.fill(
-          child: _buildPositionedItem(item, angle),
-        ));
-      });
+      // Calculate rows if itemsPerRow is set
+      final List<int>? perRowList = widget.itemsPerRow;
+      final int totalItems = widget.items.length;
+
+      // Group items into rows
+      int itemIndex = 0;
+      int rowIndex = 0;
+
+      while (itemIndex < totalItems) {
+        // Get max items for this row from the list (repeat last value if list is shorter)
+        final int maxPerRow;
+        if (perRowList == null || perRowList.isEmpty) {
+          maxPerRow = totalItems; // All items in one row
+        } else if (rowIndex < perRowList.length) {
+          maxPerRow = perRowList[rowIndex];
+        } else {
+          maxPerRow = perRowList.last; // Repeat last value for remaining rows
+        }
+
+        // Calculate how many items in this row
+        final int itemsInThisRow = (itemIndex + maxPerRow <= totalItems) ? maxPerRow : totalItems - itemIndex;
+
+        // Calculate radius for this row
+        final double rowRadius = widget.radius + (rowIndex * widget.rowSpacing);
+
+        // Add items for this row
+        for (int i = 0; i < itemsInThisRow; i++) {
+          final item = widget.items[itemIndex];
+
+          double angle;
+          if (_completeAngle == (2 * math.pi)) {
+            // Full circle - evenly distribute
+            angle = _initialAngle + (_completeAngle! / itemsInThisRow) * i;
+          } else {
+            // Partial arc
+            if (itemsInThisRow == 1) {
+              angle = _initialAngle + _completeAngle! / 2;
+            } else {
+              angle = _initialAngle + (_completeAngle! / (itemsInThisRow - 1)) * i;
+            }
+          }
+
+          items.add(Positioned.fill(
+            child: _buildPositionedItemWithRadius(item, angle, rowRadius),
+          ));
+
+          itemIndex++;
+        }
+        rowIndex++;
+      }
       return items;
     }
+  }
+
+  Widget _buildPositionedItemWithRadius(Widget child, double angle, double itemRadius) {
+    final offset = Offset.fromDirection(angle, _animation.value * itemRadius);
+
+    // Get base alignment
+    final baseAlignment = widget.alignment.resolve(TextDirection.ltr);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Convert pixel offset to alignment units
+        // Alignment goes from -1 to 1 across width/height
+        final alignmentOffsetX = (offset.dx / constraints.maxWidth) * 2;
+        final alignmentOffsetY = (offset.dy / constraints.maxHeight) * 2;
+
+        final targetAlignment = Alignment(
+          baseAlignment.x + alignmentOffsetX,
+          baseAlignment.y + alignmentOffsetY,
+        );
+
+        return Align(
+          alignment: targetAlignment,
+          child: IgnorePointer(
+            ignoring: _animation.value == 0,
+            child: _buildAnimatedItem(child),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildPositionedItem(Widget child, double angle) {
