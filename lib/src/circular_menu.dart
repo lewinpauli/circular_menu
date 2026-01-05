@@ -112,7 +112,7 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
       vsync: this,
       duration: widget.animationDuration,
     )..addListener(() {
-        setState(() {});
+        if (mounted) setState(() {});
       });
     _animation = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: widget.curve, reverseCurve: widget.reverseCurve),
@@ -205,80 +205,86 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
     super.didUpdateWidget(oldWidget);
   }
 
+  Widget _buildAnimatedItem(Widget child) {
+    return Transform.scale(
+      scale: _animation.value,
+      child: Transform.rotate(
+        angle: _animation.value * (math.pi * 2),
+        child: child,
+      ),
+    );
+  }
+
   List<Widget> _buildMenuItems() {
-    if (widget.items.length == 0) {
+    if (widget.items.isEmpty) {
       return [
         Positioned.fill(
-          child: Align(
-            alignment: widget.alignment,
-            child: Transform.translate(
-              offset: Offset.fromDirection(_initialAngle, _animation.value * widget.radius),
-              child: Transform.scale(
-                scale: _animation.value,
-                child: Transform.rotate(
-                    angle: _animation.value * (math.pi * 2),
-                    child: Container(
-                        padding: EdgeInsets.all(10),
-                        width: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.red,
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: Text(
-                          widget.errorMessageIfItemsIsEmpty,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white),
-                        ))),
+          child: _buildPositionedItem(
+            Container(
+              padding: EdgeInsets.all(10),
+              width: 100,
+              decoration: BoxDecoration(
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Text(
+                widget.errorMessageIfItemsIsEmpty,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.white),
               ),
             ),
+            _initialAngle,
           ),
         ),
       ];
     } else if (widget.items.length == 1) {
       return [
         Positioned.fill(
-          child: Align(
-            alignment: widget.alignment,
-            child: Transform.translate(
-              offset: Offset.fromDirection(_initialAngle, _animation.value * widget.radius),
-              child: Transform.scale(
-                scale: _animation.value,
-                child: Transform.rotate(
-                  angle: _animation.value * (math.pi * 2),
-                  child: widget.items[0],
-                ),
-              ),
-            ),
-          ),
+          child: _buildPositionedItem(widget.items[0], _initialAngle),
         ),
       ];
     } else {
       List<Widget> items = [];
       widget.items.asMap().forEach((index, item) {
-        items.add(
-          Positioned.fill(
-            child: Align(
-              alignment: widget.alignment,
-              child: Transform.translate(
-                offset: Offset.fromDirection(
-                    _completeAngle == (2 * math.pi)
-                        ? (_initialAngle + (_completeAngle! / (_itemsCount)) * index)
-                        : (_initialAngle + (_completeAngle! / (_itemsCount - 1)) * index),
-                    _animation.value * widget.radius),
-                child: Transform.scale(
-                  scale: _animation.value,
-                  child: Transform.rotate(
-                    angle: _animation.value * (math.pi * 2),
-                    child: item,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+        double angle = _completeAngle == (2 * math.pi)
+            ? (_initialAngle + (_completeAngle! / (_itemsCount)) * index)
+            : (_initialAngle + (_completeAngle! / (_itemsCount - 1)) * index);
+
+        items.add(Positioned.fill(
+          child: _buildPositionedItem(item, angle),
+        ));
       });
       return items;
     }
+  }
+
+  Widget _buildPositionedItem(Widget child, double angle) {
+    final offset = Offset.fromDirection(angle, _animation.value * widget.radius);
+
+    // Get base alignment
+    final baseAlignment = widget.alignment.resolve(TextDirection.ltr);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Convert pixel offset to alignment units
+        // Alignment goes from -1 to 1 across width/height
+        final alignmentOffsetX = (offset.dx / constraints.maxWidth) * 2;
+        final alignmentOffsetY = (offset.dy / constraints.maxHeight) * 2;
+
+        final targetAlignment = Alignment(
+          baseAlignment.x + alignmentOffsetX,
+          baseAlignment.y + alignmentOffsetY,
+        );
+
+        return Align(
+          alignment: targetAlignment,
+          child: IgnorePointer(
+            ignoring: _animation.value == 0,
+            child: _buildAnimatedItem(child),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildMenuButton(BuildContext context) {
@@ -319,6 +325,7 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
   @override
   Widget build(BuildContext context) {
     return Stack(
+      clipBehavior: Clip.none,
       children: <Widget>[
         widget.backgroundWidget ?? Container(),
         ..._buildMenuItems(),
@@ -330,6 +337,8 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
   @override
   void dispose() {
     _animationController.dispose();
+    _animationController.removeListener(() {});
+    _animation.removeListener(() {});
     super.dispose();
   }
 }

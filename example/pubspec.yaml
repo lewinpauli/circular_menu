@@ -9,7 +9,11 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.5
-  circular_menu: ^2.0.0
+  circular_menu:
+    path: ../
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  url_launcher: ^6.2.6
   
 # The following section is specific to Flutter.
 flutter:
