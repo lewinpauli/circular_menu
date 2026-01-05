@@ -21,6 +21,15 @@ class CircularMenuItem extends StatelessWidget {
   final Color? badgeTextColor;
   final Color? badgeColor;
 
+  /// Status indicator - shows a small colored circle (e.g., green=active, red=inactive)
+  final bool enableStatusIndicator;
+  final bool? isActive;
+  final Color? statusActiveColor;
+  final Color? statusInactiveColor;
+  final double statusIndicatorSize;
+  final double? statusIndicatorRightOffset;
+  final double? statusIndicatorTopOffset;
+
   /// if animatedIcon and icon are passed, icon will be ignored
   final AnimatedIcon? animatedIcon;
 
@@ -47,6 +56,13 @@ class CircularMenuItem extends StatelessWidget {
     this.badgeLabel,
     this.badgeTextColor,
     this.badgeColor,
+    this.enableStatusIndicator = false,
+    this.isActive,
+    this.statusActiveColor,
+    this.statusInactiveColor,
+    this.statusIndicatorSize = 10,
+    this.statusIndicatorRightOffset,
+    this.statusIndicatorTopOffset,
   })  : assert(padding >= 0.0),
         assert(margin >= 0.0);
 
@@ -103,7 +119,48 @@ class CircularMenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return enableBadge ? _buildCircularMenuItemWithBadge(context) : _buildCircularMenuItem(context);
+    Widget item = enableBadge ? _buildCircularMenuItemWithBadge(context) : _buildCircularMenuItem(context);
+
+    if (enableStatusIndicator) {
+      item = _buildWithStatusIndicator(context, item);
+    }
+
+    return item;
+  }
+
+  Widget _buildWithStatusIndicator(BuildContext context, Widget child) {
+    final Color indicatorColor =
+        isActive == true ? (statusActiveColor ?? Colors.green) : (statusInactiveColor ?? Colors.red);
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        Positioned(
+          right: statusIndicatorRightOffset ?? -2,
+          top: statusIndicatorTopOffset ?? -2,
+          child: Container(
+            width: statusIndicatorSize,
+            height: statusIndicatorSize,
+            decoration: BoxDecoration(
+              color: indicatorColor,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

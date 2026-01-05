@@ -123,6 +123,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   for (int i = 0; i < 16; i++)
                     CircularMenuItem(
                       iconSize: 18,
+                      enableStatusIndicator: true,
+                      statusIndicatorTopOffset: 12,
+                      statusIndicatorRightOffset: 12,
+                      isActive: i % 3 != 0, // Every 3rd item is inactive
                       icon: [
                         Icons.info_outline,
                         Icons.navigation,
@@ -176,6 +180,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     iconSize: 20,
                     icon: Icons.info_outline,
                     color: station['color'],
+                    enableStatusIndicator: true,
+                    statusIndicatorTopOffset: 12,
+                    statusIndicatorRightOffset: 12,
+                    isActive: station['available'] > 0,
                     onTap: () {
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,6 +198,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     iconSize: 20,
                     icon: Icons.navigation,
                     color: Colors.blue,
+                    enableStatusIndicator: true,
+                    statusIndicatorTopOffset: 12,
+                    statusIndicatorRightOffset: 12,
+                    isActive: true,
                     onTap: () {
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -204,6 +216,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     iconSize: 20,
                     icon: Icons.bolt,
                     color: Colors.amber,
+                    enableStatusIndicator: true,
+                    statusIndicatorTopOffset: 12,
+                    statusIndicatorRightOffset: 12,
+                    isActive: station['available'] > 2,
                     onTap: () {
                       ScaffoldMessenger.of(context).clearSnackBars();
                       ScaffoldMessenger.of(context).showSnackBar(
