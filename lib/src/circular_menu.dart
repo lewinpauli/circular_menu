@@ -31,6 +31,8 @@ class CircularMenu extends StatefulWidget {
 
   /// callback
   final VoidCallback? toggleButtonOnPressed;
+  final VoidCallback? onOpen;
+  final VoidCallback? onClose;
   final Color? toggleButtonColor;
   final double toggleButtonSize;
   final List<BoxShadow>? toggleButtonBoxShadow;
@@ -42,6 +44,19 @@ class CircularMenu extends StatefulWidget {
   //when you want to use your own icon instead of animated icon
   final IconData? toggleButtonIconActive; //when menu is open
   final IconData? toggleButtonIconInactive; //when menu is closed
+
+  /// badge properties for the toggle button
+  final bool toggleButtonBadgeEnabled;
+  final bool toggleButtonBadgeHideOnOpen;
+  final double? toggleButtonBadgeRightOffset;
+  final double? toggleButtonBadgeLeftOffset;
+  final double? toggleButtonBadgeTopOffset;
+  final double? toggleButtonBadgeBottomOffset;
+  final double? toggleButtonBadgeRadius;
+  final TextStyle? toggleButtonBadgeTextStyle;
+  final String? toggleButtonBadgeLabel;
+  final Color? toggleButtonBadgeTextColor;
+  final Color? toggleButtonBadgeColor;
 
   /// staring angle in clockwise radian
   final double? startingAngleInRadian;
@@ -65,6 +80,8 @@ class CircularMenu extends StatefulWidget {
     this.curve = Curves.bounceOut,
     this.reverseCurve = Curves.fastOutSlowIn,
     this.toggleButtonOnPressed,
+    this.onOpen,
+    this.onClose,
     this.toggleButtonColor,
     this.toggleButtonBoxShadow,
     this.toggleButtonMargin = 10,
@@ -74,6 +91,17 @@ class CircularMenu extends StatefulWidget {
     this.toggleButtonAnimatedIconData,
     this.toggleButtonIconActive,
     this.toggleButtonIconInactive,
+    this.toggleButtonBadgeEnabled = false,
+    this.toggleButtonBadgeHideOnOpen = true,
+    this.toggleButtonBadgeRightOffset,
+    this.toggleButtonBadgeLeftOffset,
+    this.toggleButtonBadgeTopOffset,
+    this.toggleButtonBadgeBottomOffset,
+    this.toggleButtonBadgeRadius,
+    this.toggleButtonBadgeTextStyle,
+    this.toggleButtonBadgeLabel,
+    this.toggleButtonBadgeTextColor,
+    this.toggleButtonBadgeColor,
     this.key,
     this.startingAngleInRadian,
     this.endingAngleInRadian,
@@ -94,6 +122,20 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
   double? _startAngle;
   late int _itemsCount;
   late Animation<double> _animation;
+  bool _isVisible = true;
+
+  /// Returns true if the menu is currently open
+  bool get isOpen => _animationController.status != AnimationStatus.dismissed;
+
+  /// Shows the menu button (used by MultiCircularMenu coordination)
+  void show() {
+    if (mounted) setState(() => _isVisible = true);
+  }
+
+  /// Hides the menu button (used by MultiCircularMenu coordination)
+  void hide() {
+    if (mounted) setState(() => _isVisible = false);
+  }
 
   /// forward animation
   void forwardAnimation() {
@@ -301,12 +343,14 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
           color: widget.toggleButtonColor ?? Theme.of(context).primaryColor,
           padding: (-_animation.value * widget.toggleButtonPadding * 0.5) + widget.toggleButtonPadding,
           onTap: () {
-            _animationController.status == AnimationStatus.dismissed
-                ? (_animationController).forward()
-                : (_animationController).reverse();
-            if (widget.toggleButtonOnPressed != null) {
-              widget.toggleButtonOnPressed!();
+            if (_animationController.status == AnimationStatus.dismissed) {
+              _animationController.forward();
+              widget.onOpen?.call();
+            } else {
+              _animationController.reverse();
+              widget.onClose?.call();
             }
+            widget.toggleButtonOnPressed?.call();
           },
           boxShadow: widget.toggleButtonBoxShadow,
           animatedIcon: widget.toggleButtonIconInactive == null && widget.toggleButtonIconActive == null
@@ -317,6 +361,17 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
                   progress: _animation,
                 )
               : null,
+          enableBadge: widget.toggleButtonBadgeEnabled &&
+              !(widget.toggleButtonBadgeHideOnOpen && _animationController.status != AnimationStatus.dismissed),
+          badgeRightOffset: widget.toggleButtonBadgeRightOffset,
+          badgeLeftOffset: widget.toggleButtonBadgeLeftOffset,
+          badgeTopOffset: widget.toggleButtonBadgeTopOffset,
+          badgeBottomOffset: widget.toggleButtonBadgeBottomOffset,
+          badgeRadius: widget.toggleButtonBadgeRadius,
+          badgeTextStyle: widget.toggleButtonBadgeTextStyle,
+          badgeLabel: widget.toggleButtonBadgeLabel,
+          badgeTextColor: widget.toggleButtonBadgeTextColor,
+          badgeColor: widget.toggleButtonBadgeColor,
         ),
       ),
     );
@@ -324,13 +379,20 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: <Widget>[
-        widget.backgroundWidget ?? Container(),
-        ..._buildMenuItems(),
-        _buildMenuButton(context),
-      ],
+    return AnimatedOpacity(
+      opacity: _isVisible ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 200),
+      child: IgnorePointer(
+        ignoring: !_isVisible,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: <Widget>[
+            widget.backgroundWidget ?? Container(),
+            ..._buildMenuItems(),
+            _buildMenuButton(context),
+          ],
+        ),
+      ),
     );
   }
 
