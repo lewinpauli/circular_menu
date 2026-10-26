@@ -21,6 +21,9 @@ class CircularMenuItem extends StatelessWidget {
   final Color? badgeTextColor;
   final Color? badgeColor;
 
+  /// called when the badge is tapped; falls back to [onTap] when null
+  final VoidCallback? onBadgeTap;
+
   /// Status indicator - shows a small colored circle (e.g., green=active, red=inactive)
   final bool enableStatusIndicator;
   final bool? isActive;
@@ -56,6 +59,7 @@ class CircularMenuItem extends StatelessWidget {
     this.badgeLabel,
     this.badgeTextColor,
     this.badgeColor,
+    this.onBadgeTap,
     this.enableStatusIndicator = false,
     this.isActive,
     this.statusActiveColor,
@@ -110,7 +114,7 @@ class CircularMenuItem extends StatelessWidget {
       topOffset: badgeTopOffset,
       radius: badgeRadius,
       textStyle: badgeTextStyle,
-      onTap: onTap,
+      onTap: onBadgeTap ?? onTap,
       textColor: badgeTextColor,
       label: badgeLabel,
       child: _buildCircularMenuItem(context),

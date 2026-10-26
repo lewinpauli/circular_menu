@@ -67,6 +67,10 @@ class CircularMenu extends StatefulWidget {
   final Color? toggleButtonBadgeTextColor;
   final Color? toggleButtonBadgeColor;
 
+  /// called when the toggle button's badge is tapped; when null, tapping the
+  /// badge toggles the menu like tapping the button itself
+  final VoidCallback? toggleButtonBadgeOnTap;
+
   /// staring angle in clockwise radian
   final double? startingAngleInRadian;
 
@@ -113,6 +117,7 @@ class CircularMenu extends StatefulWidget {
     this.toggleButtonBadgeLabel,
     this.toggleButtonBadgeTextColor,
     this.toggleButtonBadgeColor,
+    this.toggleButtonBadgeOnTap,
     this.key,
     this.startingAngleInRadian,
     this.endingAngleInRadian,
@@ -452,6 +457,7 @@ class CircularMenuState extends State<CircularMenu> with SingleTickerProviderSta
           badgeLabel: widget.toggleButtonBadgeLabel,
           badgeTextColor: widget.toggleButtonBadgeTextColor,
           badgeColor: widget.toggleButtonBadgeColor,
+          onBadgeTap: widget.toggleButtonBadgeOnTap,
         ),
       ),
     );
