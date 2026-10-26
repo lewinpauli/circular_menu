@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 class CircularMenuItem extends StatelessWidget {
   /// if icon and animatedIcon are passed, icon will be ignored
@@ -198,7 +199,10 @@ class _Badge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    // The badge is usually offset outside the button (e.g. below it). A plain
+    // Stack only delivers taps inside its own bounds, so the badge's
+    // GestureDetector would never fire there - hence the overflow hit test.
+    return _OverflowHitTestStack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
       children: [
@@ -237,5 +241,43 @@ class _Badge extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+/// A [Stack] that also hit-tests children positioned outside its own bounds.
+class _OverflowHitTestStack extends Stack {
+  _OverflowHitTestStack({
+    AlignmentGeometry alignment = AlignmentDirectional.topStart,
+    Clip clipBehavior = Clip.hardEdge,
+    List<Widget> children = const <Widget>[],
+  }) : super(alignment: alignment, clipBehavior: clipBehavior, children: children);
+
+  @override
+  RenderStack createRenderObject(BuildContext context) {
+    return _RenderOverflowHitTestStack(
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.maybeOf(context),
+      fit: fit,
+      clipBehavior: clipBehavior,
+    );
+  }
+}
+
+class _RenderOverflowHitTestStack extends RenderStack {
+  _RenderOverflowHitTestStack({
+    required AlignmentGeometry alignment,
+    TextDirection? textDirection,
+    required StackFit fit,
+    required Clip clipBehavior,
+  }) : super(alignment: alignment, textDirection: textDirection, fit: fit, clipBehavior: clipBehavior);
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    // Same as RenderBox.hitTest, minus the `size.contains(position)` check.
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+    return false;
   }
 }

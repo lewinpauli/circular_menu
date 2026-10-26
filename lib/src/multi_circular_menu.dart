@@ -173,6 +173,7 @@ class _MultiCircularMenuState extends State<MultiCircularMenu> {
         toggleButtonBadgeLabel: menu.toggleButtonBadgeLabel,
         toggleButtonBadgeTextColor: menu.toggleButtonBadgeTextColor,
         toggleButtonBadgeColor: menu.toggleButtonBadgeColor,
+        toggleButtonBadgeOnTap: menu.toggleButtonBadgeOnTap,
         startingAngleInRadian: menu.startingAngleInRadian,
         endingAngleInRadian: menu.endingAngleInRadian,
         errorMessageIfItemsIsEmpty: menu.errorMessageIfItemsIsEmpty,
